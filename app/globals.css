@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+body {
+  direction: rtl;
+}
+
+@layer utilities {
+  .ltr {
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: embed;
+  }
+}
