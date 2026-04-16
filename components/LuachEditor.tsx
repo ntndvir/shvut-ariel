@@ -36,12 +36,25 @@ export default function LuachEditor() {
 
   const loadLatestLuach = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    // Prefer the most recently published luach
+    let { data, error } = await supabase
       .from('luach_shavui')
       .select('*')
-      .order('created_at', { ascending: false })
+      .eq('is_published', true)
+      .order('shavua_date', { ascending: false })
       .limit(1)
       .single();
+
+    // Nothing published — fall back to most recently created
+    if (!data) {
+      ({ data, error } = await supabase
+        .from('luach_shavui')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single());
+    }
+
     if (error && error.code !== 'PGRST116') {
       setStatus('שגיאה בטעינת הלוח: ' + error.message);
     } else if (data) {
@@ -126,6 +139,20 @@ export default function LuachEditor() {
     loadForRow(zmanimRows[i]);
   }
 
+  function handleResetToDefault() {
+    if (!luach || zmanimRows.length === 0) return;
+    const row = zmanimRows.find((r) => {
+      const [dd, mm, yyyy] = r.taarikh_luazi.split('/');
+      return `${yyyy}-${mm}-${dd}` === luach.shavua_date;
+    });
+    if (!row) {
+      setStatus('לא נמצאו נתוני זמנים מקוריים לפרשה זו');
+      return;
+    }
+    setSadot(zmanimRowToSadot(row));
+    setStatus('הוחזר לברירת מחדל — לחץ שמור לשמירה');
+  }
+
   async function handleSave() {
     if (!luach) return;
     setSaving(true);
@@ -168,10 +195,15 @@ export default function LuachEditor() {
     }
   }
 
-  function handleAddField() {
+  function handleAddField(section: 'fri' | 'shab' | 'chol') {
     customCounterRef.current += 1;
-    const key = `custom_${customCounterRef.current}`;
-    setSadot([...sadot, { key, label: '', value: '' }]);
+    const key = `${section}_custom_${customCounterRef.current}`;
+    const newField: SadotField = { key, label: '', value: '' };
+    const prefix = section + '_';
+    const lastIdx = sadot.reduce((acc, f, i) => (f.key.startsWith(prefix) ? i : acc), -1);
+    const next = [...sadot];
+    next.splice(lastIdx + 1, 0, newField);
+    setSadot(next);
   }
 
   if (loading) return <p className="text-gray-400 italic">טוען...</p>;
@@ -223,6 +255,14 @@ export default function LuachEditor() {
             </button>
 
             <button
+              onClick={handleResetToDefault}
+              disabled={saving}
+              className="bg-orange-50 border border-orange-300 text-orange-700 hover:bg-orange-100 px-4 py-2 rounded transition disabled:opacity-60"
+            >
+              ↺ ברירת מחדל
+            </button>
+
+            <button
               onClick={handleSave}
               disabled={saving}
               className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded transition disabled:opacity-60"
@@ -258,12 +298,20 @@ export default function LuachEditor() {
       {luach && (
         <>
           <SadotList sadot={sadot} onChange={setSadot} />
-          <button
-            onClick={handleAddField}
-            className="mt-2 text-blue-600 hover:text-blue-800 text-sm underline"
-          >
-            + הוסף שדה
-          </button>
+          <div className="flex gap-4 mt-2">
+            {(['fri', 'shab', 'chol'] as const).map((sec) => {
+              const labels = { fri: '+ שישי', shab: '+ שבת', chol: '+ חול' };
+              return (
+                <button
+                  key={sec}
+                  onClick={() => handleAddField(sec)}
+                  className="text-blue-600 hover:text-blue-800 text-sm underline"
+                >
+                  {labels[sec]}
+                </button>
+              );
+            })}
+          </div>
         </>
       )}
 
