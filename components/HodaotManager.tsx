@@ -57,9 +57,17 @@ export default function HodaotManager() {
     if (!text) return;
     setLoading(true);
     setError('');
-    const { error: err } = await supabase.from('hodaot').insert({ teken: text });
+    const res = await fetch('/api/hodaot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({ teken: text }),
+    });
+    const { error: err } = await res.json();
     if (err) {
-      setError('שגיאה בהוספת הודעה: ' + err.message);
+      setError('שגיאה בהוספת הודעה: ' + err);
     } else {
       setNewText('');
       await fetchHodaot();
@@ -68,9 +76,17 @@ export default function HodaotManager() {
   }
 
   async function handleDelete(id: number) {
-    const { error: err } = await supabase.from('hodaot').delete().eq('id', id);
+    const res = await fetch('/api/hodaot', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({ id }),
+    });
+    const { error: err } = await res.json();
     if (err) {
-      setError('שגיאה במחיקת הודעה: ' + err.message);
+      setError('שגיאה במחיקת הודעה: ' + err);
     } else {
       setHodaot((prev) => prev.filter((h) => h.id !== id));
     }

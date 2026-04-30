@@ -103,20 +103,24 @@ export default function LuachEditor() {
       return;
     }
 
-    const { data: inserted, error } = await supabase
-      .from('luach_shavui')
-      .insert({
+    const res = await fetch('/api/luach', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({
         shavua_date: shavuaDate,
         parasha,
         sadot: sadotNew,
         is_published: false,
         auto_load: true,
-      })
-      .select()
-      .single();
+      }),
+    });
+    const { data: inserted, error } = await res.json();
 
     if (error) {
-      statusMsg = 'שגיאה ביצירת הלוח: ' + error.message;
+      statusMsg = 'שגיאה ביצירת הלוח: ' + error;
     } else if (inserted) {
       setLuach(inserted as LuachShavui);
       setSadot((inserted as LuachShavui).sadot ?? []);
@@ -156,25 +160,34 @@ export default function LuachEditor() {
   async function handleSave() {
     if (!luach) return;
     setSaving(true);
-    const { error } = await supabase
-      .from('luach_shavui')
-      .update({ sadot })
-      .eq('id', luach.id);
+    const res = await fetch('/api/luach', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({ id: luach.id, fields: { sadot } }),
+    });
+    const { error } = await res.json();
     setSaving(false);
-    setStatus(error ? 'שגיאה בשמירה: ' + error.message : 'נשמר ✓');
+    setStatus(error ? 'שגיאה בשמירה: ' + error : 'נשמר ✓');
   }
 
   async function handlePublish() {
     if (!luach) return;
     setSaving(true);
-    await supabase.from('luach_shavui').update({ is_published: false }).neq('id', luach.id);
-    const { error } = await supabase
-      .from('luach_shavui')
-      .update({ sadot, is_published: true })
-      .eq('id', luach.id);
+    const res = await fetch('/api/luach', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({ id: luach.id, fields: { sadot, is_published: true }, action: 'publish' }),
+    });
+    const { error } = await res.json();
     setSaving(false);
     if (error) {
-      setStatus('שגיאה בפרסום: ' + error.message);
+      setStatus('שגיאה בפרסום: ' + error);
     } else {
       setLuach({ ...luach, is_published: true });
       setStatus('פורסם ✓');
@@ -184,12 +197,17 @@ export default function LuachEditor() {
   async function handleToggleAutoLoad() {
     if (!luach) return;
     const newVal = !luach.auto_load;
-    const { error } = await supabase
-      .from('luach_shavui')
-      .update({ auto_load: newVal })
-      .eq('id', luach.id);
+    const res = await fetch('/api/luach', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD}`,
+      },
+      body: JSON.stringify({ id: luach.id, fields: { auto_load: newVal } }),
+    });
+    const { error } = await res.json();
     if (error) {
-      setStatus('שגיאה בעדכון: ' + error.message);
+      setStatus('שגיאה בעדכון: ' + error);
     } else {
       setLuach({ ...luach, auto_load: newVal });
     }
