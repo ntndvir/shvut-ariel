@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { zmanimRowToSadot } from '@/lib/zmanim-utils';
 import SadotList from './SadotList';
 import type { LuachShavui, SadotField, ZmanimRow } from '@/types';
@@ -23,7 +23,7 @@ export default function LuachEditor() {
   // Fetch all zmanim rows on mount and sort them
   useEffect(() => {
     async function fetchZmanim() {
-      const { data } = await supabase.from('zmanim').select('*');
+      const { data } = await getSupabase().from('zmanim').select('*');
       if (data && data.length > 0) {
         const sorted = (data as ZmanimRow[]).sort(
           (a, b) => luaziToSortKey(a.taarikh_luazi) - luaziToSortKey(b.taarikh_luazi)
@@ -37,7 +37,7 @@ export default function LuachEditor() {
   const loadLatestLuach = useCallback(async () => {
     setLoading(true);
     // Prefer the most recently published luach
-    let { data, error } = await supabase
+    let { data, error } = await getSupabase()
       .from('luach_shavui')
       .select('*')
       .eq('is_published', true)
@@ -47,7 +47,7 @@ export default function LuachEditor() {
 
     // Nothing published — fall back to most recently created
     if (!data) {
-      ({ data, error } = await supabase
+      ({ data, error } = await getSupabase()
         .from('luach_shavui')
         .select('*')
         .order('created_at', { ascending: false })
@@ -88,7 +88,7 @@ export default function LuachEditor() {
     const shavuaDate = `${yyyy}-${mm}-${dd}`;
 
     // Check if a luach already exists for this date
-    const { data: existing } = await supabase
+    const { data: existing } = await getSupabase()
       .from('luach_shavui')
       .select('*')
       .eq('shavua_date', shavuaDate)

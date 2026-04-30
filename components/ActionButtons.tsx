@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { buildWhatsAppText } from '@/lib/whatsapp-utils';
 import type { LuachShavui, Hodaa } from '@/types';
 
@@ -14,14 +14,14 @@ export default function ActionButtons() {
     async function load() {
       const [{ data: luachData, error: luachErr }, { data: hodaotData, error: hodaotErr }] =
         await Promise.all([
-          supabase
+          getSupabase()
             .from('luach_shavui')
             .select('*')
             .eq('is_published', true)
             .order('shavua_date', { ascending: false })
             .limit(1)
             .single(),
-          supabase.from('hodaot').select('*').order('created_at', { ascending: true }),
+          getSupabase().from('hodaot').select('*').order('created_at', { ascending: true }),
         ]);
 
       if (luachErr && luachErr.code !== 'PGRST116') {

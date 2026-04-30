@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import type { Hodaa } from '@/types';
 
 const EMOJI_PRESETS = [
@@ -26,7 +26,7 @@ export default function HodaotManager() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function fetchHodaot() {
-    const { data, error: err } = await supabase
+    const { data, error: err } = await getSupabase()
       .from('hodaot')
       .select('*')
       .order('created_at', { ascending: true });
