@@ -17,14 +17,14 @@ function buildColumnHtml(title: string, fields: SadotField[]): string {
     .map(
       (f, idx) =>
         `<tr style="background:${idx % 2 === 0 ? '#f3f4f6' : '#ffffff'}">
-          <td style="padding:4px 8px;color:#374151;font-size:12px">${stripDaySuffix(f.label)}</td>
-          <td style="padding:4px 8px;font-weight:700;font-size:12px;direction:ltr;text-align:left;color:#111827">${f.value}</td>
+          <td style="padding:6px 10px;color:#374151;font-size:15px">${stripDaySuffix(f.label)}</td>
+          <td style="padding:6px 10px;font-weight:700;font-size:15px;direction:ltr;text-align:left;color:#111827">${f.value}</td>
         </tr>`
     )
     .join('');
   return `
     <div style="flex:1;min-width:0">
-      <div style="background:#374151;color:#fff;text-align:center;padding:5px 0;font-weight:700;font-size:13px;border-radius:4px 4px 0 0">${title}</div>
+      <div style="background:#374151;color:#fff;text-align:center;padding:7px 0;font-weight:700;font-size:16px;border-radius:4px 4px 0 0">${title}</div>
       <table style="width:100%;border-collapse:collapse;border:1px solid #d1d5db;border-top:none">
         <tbody>${rows}</tbody>
       </table>
@@ -52,14 +52,14 @@ export function generateAndDownloadPDF(luach: LuachShavui, hodaot: Hodaa[]): voi
   const customHtml =
     customFields.length > 0
       ? `<div style="margin-top:12px">
-          <div style="background:#6b7280;color:#fff;text-align:center;padding:4px 0;font-weight:700;font-size:12px;border-radius:4px 4px 0 0">נוסף</div>
+          <div style="background:#6b7280;color:#fff;text-align:center;padding:6px 0;font-weight:700;font-size:15px;border-radius:4px 4px 0 0">נוסף</div>
           <table style="width:100%;border-collapse:collapse;border:1px solid #d1d5db;border-top:none">
             <tbody>${customFields
               .map(
                 (f, idx) =>
                   `<tr style="background:${idx % 2 === 0 ? '#f3f4f6' : '#ffffff'}">
-                    <td style="padding:4px 8px;color:#374151;font-size:12px">${f.label}</td>
-                    <td style="padding:4px 8px;font-weight:700;font-size:12px;direction:ltr;text-align:left;color:#111827">${f.value}</td>
+                    <td style="padding:6px 10px;color:#374151;font-size:15px">${f.label}</td>
+                    <td style="padding:6px 10px;font-weight:700;font-size:15px;direction:ltr;text-align:left;color:#111827">${f.value}</td>
                   </tr>`
               )
               .join('')}</tbody>
@@ -70,12 +70,12 @@ export function generateAndDownloadPDF(luach: LuachShavui, hodaot: Hodaa[]): voi
   const hodaotHtml =
     hodaot.length > 0
       ? `<div style="margin-bottom:16px;border:1px solid #d1d5db;border-radius:4px;overflow:hidden">
-          <div style="background:#374151;color:#fff;padding:5px 10px;font-weight:700;font-size:13px">הודעות</div>
-          <div style="padding:8px 10px">
+          <div style="background:#374151;color:#fff;padding:7px 10px;font-weight:700;font-size:16px">הודעות</div>
+          <div style="padding:10px 12px">
             ${hodaot
               .map(
                 (h) =>
-                  `<p style="margin:0 0 6px;font-size:12px;color:#111827;white-space:pre-wrap;border-right:3px solid #9ca3af;padding-right:8px">${h.teken}</p>`
+                  `<p style="margin:0 0 8px;font-size:15px;color:#111827;white-space:pre-wrap;border-right:3px solid #9ca3af;padding-right:10px">${h.teken}</p>`
               )
               .join('')}
           </div>
@@ -102,9 +102,9 @@ export function generateAndDownloadPDF(luach: LuachShavui, hodaot: Hodaa[]): voi
 </head>
 <body>
   <div style="text-align:center;margin-bottom:12px">
-    <div style="font-size:18px;font-weight:700;color:#111827">זמני תפילות — בית כנסת שבות אריאל</div>
-    <div style="font-size:13px;font-weight:600;color:#374151;margin-top:2px">${parasha}</div>
-    ${dateStr ? `<div style="font-size:11px;color:#6b7280;margin-top:2px">${dateStr}</div>` : ''}
+    <div style="font-size:22px;font-weight:700;color:#111827">זמני תפילות — בית כנסת שבות אריאל</div>
+    <div style="font-size:16px;font-weight:600;color:#374151;margin-top:4px">${parasha}</div>
+    ${dateStr ? `<div style="font-size:14px;color:#6b7280;margin-top:2px">${dateStr}</div>` : ''}
   </div>
 
   ${hodaotHtml}
